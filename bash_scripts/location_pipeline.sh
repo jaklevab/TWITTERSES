@@ -8,7 +8,8 @@ cd /warehouse/COMPLEXNET/jlevyabi/ml_soc_econ/jq-1.5
 echo "Collecting information from users having tweeted with geolocation ..."
 echo "Collected information: twitter_id, posting_time, latititude, longitude, city, service, profile description, # followers, # friends, tweet, # urls"
 
-for f in /warehouse/COMPLEXNET/TWITTER/data/*.tgz
+# Locations conatained in 2014-2015 sample
+for f in /warehouse/COMPLEXNET/TWITTER/data/201@(4|5)*
 do
 	echo "Processing file: "$f
         zcat $f| sed "s/^[^{]*//g"|./jq -R 'fromjson?' \

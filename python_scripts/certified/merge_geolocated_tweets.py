@@ -59,10 +59,7 @@ if __name__ == '__main__':
            user_id=file.split("_")[0]
            #Retweet removal
            no_rt_data_pd=data_pd[~data_pd.tweet_text.str.contains("RT ")]
-           #Rem The following regex just strips of an URL (not just http)
-           #, any punctuations, User Names or Any non alphanumeric characters.
-           # It also separates the word with a single space.
-           #+ Lowercasing + Accent Stripping
+           #Rem The following regex just strips of an URL (not just http, any punctuations, User Names or Any non alphanumeric characters + Lowercasing + Accent Stripping
            no_rt_data_pd=apply_inplace(no_rt_data_pd, "tweet_text",compose2(tweet_lower,tweet_clean))
            no_rt_data_pd["user_id"]=[user_id for _ in range(no_rt_data_pd.shape[0])]
            no_rt_data_pd=no_rt_data_pd[["user_id","tweet_id","tweet_date","tweet_text"]]
