@@ -22,7 +22,7 @@ def after_treatment_word2vec(w2v_model,min_times):
     return treated_words
 
 """ Generate spectral clusters based on w2v embeddings"""
-def w2v_spectral_clustering(w2v_model,f_out,min_times=70,threshold_for_bug = 0.000000001,nb_clusts=100):
+def w2v_spectral_clustering(w2v_model,f_out,nb_clusts,min_times=70,threshold_for_bug = 0.000000001,):
     vocab = after_treatment_word2vec(model,min_times)
     print("Nb words in vocabulary.... %d"%len(vocab))
     print("Computing similarity matrix .....")
@@ -46,9 +46,10 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument("-w2v", "--w2v_input")
 	parser.add_argument("-out", "--output")
-	w2v_input, f_out = args.w2v_input, args.output
+	parser.add_argument("-nbc", "--nb_clusters")
+    w2v_input, f_out, nb_clusters = args.w2v_input, args.output, args.nb_clusters
 	args = parser.parse_args()
     print("Model Loading....")
     w2v_model = Word2Vec.load(w2v_input)
-    w2v_spectral_clustering(w2v_model,f_out)
+    w2v_spectral_clustering(w2v_model,f_out,nb_clusters)
     print("Done ....!")
