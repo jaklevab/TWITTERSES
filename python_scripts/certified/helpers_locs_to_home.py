@@ -258,7 +258,7 @@ def get_check_in_rate_margin_most_freq(geopandas_usr):
             idx_mode_sec,geopandas_usr.iloc[idx_mode_sec][["lat","lon"]],
            ((locat_mode[1]+0.0-sec_locat_mode[1])/(sec_locat_mode[1]+locat_mode[1])))
 
-""" Take most frequent night location out of visited ones if present more than min_times with a min span of min_days"""
+""" Take most frequent night location out of visited ones"""
 def take_most_frequent_night_thresh(geopandas_usr,start=21,stop=6) :
     polys_visited=(geopandas_usr.idINSPIRE)
     polys_visited_night=polys_visited[(geopandas_usr.hour>=start)|(geopandas_usr.hour<stop)]
