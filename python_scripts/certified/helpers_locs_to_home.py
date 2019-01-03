@@ -1,5 +1,3 @@
-################################# IMPORTS #################################
-
 import pandas as pd
 import numpy as np
 from datetime import date,timedelta
@@ -19,8 +17,6 @@ import json
 from tqdm import tqdm_notebook as tqdm
 import sys
 import os
-#path = "/datastore/complexnet/twitter/data/users.db"
-#con = lite.connect(path)
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -28,12 +24,6 @@ uk = '+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 \
 +x_0=400000 +y_0=-100000 +ellps=airy \
 +towgs84=446.448,-125.157,542.06,0.15,0.247,0.842,-20.489 +units=m +no_defs'
 
-################################# TODO #################################
-
-# INCREASE nb_mini_locs !!! --> 15
-# I've changed the parts where I read the sql db because of some user permission problem :Change
-print("Reminder: Not running filters based on users.db")
-################################# HELPERS #################################
 """Take string of data returns arrays for day, ..., year"""
 def time_2_date(time_array):
     fechas=[];days=[];hours=[];minutes=[];seconds=[];years=[];months=[]
@@ -56,7 +46,7 @@ def time_2_date(time_array):
             print(times)
     return days,fechas,hours,minutes,seconds,years,months
 
-"""Project geographic co-ordinates to get cartesian x,y. Transform(origin|destination|lon|lat)"""
+"""Project geographic coordinates to get cartesian x,y. Transform(origin|destination|lon|lat)"""
 def proj_arr(points,proj_to):
     inproj = Proj(init='epsg:4326')
     outproj = Proj(proj_to)
@@ -89,7 +79,7 @@ def is_real(visit_df,max_km_var,max_km_per_h,nb_mini_locs):
         return False,1,med,speed
     return True,"",rel_dist,speed
 
-""" Signals too fast/variable/maree_info accounts  """
+""" Signals too fast/variable accounts  """
 def filter_crazy_users(dic,max_km_var,max_km_per_h,nb_mini_locs,nb_min_crazy):
     dic_too_fast={}
     dic_too_var={}
@@ -98,9 +88,6 @@ def filter_crazy_users(dic,max_km_var,max_km_per_h,nb_mini_locs,nb_min_crazy):
     dic_real_usrs={}
     with pd.option_context('display.max_rows', None, 'display.max_columns', 30):#with con:
         for usr,visits in tqdm(dic.items()):
-            #cur = con.cursor()
-            #cur.execute("SELECT screen_name FROM users WHERE id = '%s'" %usr )
-            s_name=None#cur.fetchone()
             if (s_name!=None and "maree_info" in s_name[0]):
                 dic_mar[usr]=visits
                 continue
@@ -243,3 +230,89 @@ def location_to_weighted_income(dic_usr_locs,dic_dist,dic_soc_info,precision):
         new_dic_usr_loc[k]=(np.mean(incomes),np.std(incomes),insert)
     return new_dic_usr_loc
 
+""" Take most frequent location out of visited ones if present more than min_times with a min span of min_days"""
+def take_most_frequent_thresh(geopandas_usr,min_times=5,min_days=1):
+    polys_visited=list(geopandas_usr.idINSPIRE)
+    time_of_visit=[datetime(int(row.year),int(row.month),int(row.fecha),
+                            int(row.hour),int(row.minu),int(row.sec))
+                   for it,row in geopandas_usr.iterrows()]
+    locat_mode=Counter(polys_visited).most_common(1)[0][0]
+    nb_times=Counter(polys_visited).most_common(1)[0][1]
+    inter_idx=np.where([x==locat_mode for x in polys_visited])[0].tolist()
+    time_diff=[time_of_visit[i] for i in inter_idx]
+    if nb_times>=min_times and (max(time_diff)-min(time_diff)).days>=min_days:
+        idx_mode=polys_visited.index(locat_mode)
+        return idx_mode,geopandas_usr.iloc[idx_mode][["lat","lon"]]
+    else:
+        return None,None
+
+""" Gets ratio of how much more the first most visited location was observed than the second most visited """
+def get_check_in_rate_margin_most_freq(geopandas_usr):
+    polys_visited=list(geopandas_usr.idINSPIRE)
+    inter=Counter(polys_visited).most_common(2)
+    if len(inter)<2:
+        return None,None,None,None,None
+    locat_mode,sec_locat_mode=inter
+    idx_mode,idx_mode_sec=polys_visited.index(locat_mode[0]),polys_visited.index(sec_locat_mode[0])
+    return (idx_mode,geopandas_usr.iloc[idx_mode][["lat","lon"]],
+            idx_mode_sec,geopandas_usr.iloc[idx_mode_sec][["lat","lon"]],
+           ((locat_mode[1]+0.0-sec_locat_mode[1])/(sec_locat_mode[1]+locat_mode[1])))
+
+""" Take most frequent night location out of visited ones if present more than min_times with a min span of min_days"""
+def take_most_frequent_night_thresh(geopandas_usr,start=21,stop=6) :
+    polys_visited=(geopandas_usr.idINSPIRE)
+    polys_visited_night=polys_visited[(geopandas_usr.hour>=start)|(geopandas_usr.hour<stop)]
+    if len(polys_visited_night)==0:
+        return None,None
+    locat_mode=Counter(polys_visited_night).most_common(1)[0][0]
+    idx_mode=list(polys_visited).index(locat_mode)
+    return idx_mode,geopandas_usr.iloc[idx_mode][["lat","lon"]]
+
+""" Efficient computation of distance matrix between all visited locations (mts)"""
+def get_distance_matrix(geopandas_usr):
+    x = np.array(geopandas_usr[["lat","lon"]]).astype(float).tolist()
+    y=proj_arr(x,uk)
+    ztree = cKDTree(y)
+    z = ztree.sparse_distance_matrix(ztree,1e6,p=2).todense()
+    return z
+
+""" Computes distance between most visited location and all others (mts)"""
+def distance_to_home(geopandas_usr,select_home_loc,args):
+    idx,loc=select_home_loc(geopandas_usr,*args)
+    if idx is None:
+        return None,None,None
+    mat_dist=get_distance_matrix(geopandas_usr)
+    return mat_dist[idx,:].tolist()[0],list(geopandas_usr.day),list(geopandas_usr.hour)
+
+""" Gathers all locations per user in a dictionary """
+def go_through_home_candidates(dic_gpd,select_home_loc):
+    dic_exam={}
+    for usr,gpd in tqdmn(dic_gpd.items()):
+        idx,loc=select_home_loc(gpd)
+        if idx is None:
+            continue
+        dic_exam.setdefault(usr,gpd.iloc[idx])
+    return dic_exam
+
+""" Computes average distance to home location through out the week (mts)"""
+def go_through_geol_users(dic_gpd,select_home_loc,args,outlier_lim=6e4):
+    dic_per_day={k:np.zeros(24) for k in range(7)}
+    dic_nb_per_day={k:np.zeros(24) for k in range(7)}
+    dic_exam={}
+    loss=[]
+    for usr,gpd in tqdmn(dic_gpd.items()):
+        dic_exam.setdefault(usr,[])
+        dists,days,hours=distance_to_home(gpd,select_home_loc,args)
+        new_dists=np.array(dists)
+        if dists is None:
+            continue
+        loss.append(1-(np.sum([new_dists<outlier_lim])+0.0)/len(dists) )
+        dists=new_dists[new_dists<outlier_lim]
+        for dist,day,hour in zip(dists,days,hours):
+            dic_exam[usr].append(dist)
+            dic_per_day[day][hour]+=dist
+            dic_nb_per_day[day][hour]+=1
+    dic_day={}
+    for k,v in dic_per_day.items():
+        dic_day[k]=(v/dic_nb_per_day[k])/100
+    return dic_day,dic_exam,loss
