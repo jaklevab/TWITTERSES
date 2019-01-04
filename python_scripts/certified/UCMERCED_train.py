@@ -43,9 +43,9 @@ from keras.layers import Convolution2D, MaxPooling2D, ZeroPadding2D, Activation,
 
 
 cwd = os.getcwd()
-
+""" Loads an image into PIL format. """
 def load_img(path, grayscale=False, target_size=None):
-    """Loads an image into PIL format.
+    """
     # Arguments
         path: Path to image file
         grayscale: Boolean, whether to load the image as grayscale.
@@ -72,8 +72,9 @@ def load_img(path, grayscale=False, target_size=None):
             img = img.resize(hw_tuple)
     return img
 
+""" Converts a 3D Numpy array to a PIL Image instance. """
 def array_to_img(x, data_format=None, scale=True):
-    """Converts a 3D Numpy array to a PIL Image instance.
+    """
     # Arguments
         x: Input Numpy array.
         data_format: Image data format.
@@ -117,6 +118,7 @@ def array_to_img(x, data_format=None, scale=True):
     else:
         raise ValueError('Unsupported channel number: ', x.shape[2])
 
+""" Converts a PIL Image instance to a Numpy array. """
 def img_to_array(img, data_format=None):
     """Converts a PIL Image instance to a Numpy array.
     # Arguments
@@ -147,11 +149,13 @@ def img_to_array(img, data_format=None):
         raise ValueError('Unsupported image shape: ', x.shape)
     return x
 
+""" List all images in directory """
 def list_pictures(directory, ext='jpg|jpeg|bmp|png|tif'):
     return [os.path.join(root, f)
             for root, _, files in os.walk(directory) for f in files
             if re.match(r'([\w]+\.(?:' + ext + '))', f)]
 
+""" Creates image to label dataset"""
 def database_image(shape=(256,256,3), directory="/warehouse/COMPLEXNET/jlevyabi/TWITTERSES/ml_soc_econ/data_files/images_suspected_locs/UCMerced_LandUse/full/" ):
     images=list_pictures(directory)
     X,y,y_name=[],[],[]
@@ -168,6 +172,7 @@ def database_image(shape=(256,256,3), directory="/warehouse/COMPLEXNET/jlevyabi/
         y_name.append(im)
     return X,y,y_name
 
+""" Defines F-beta score"""
 def fbs(y_true, y_pred, threshold_shift=0., beta=1):
     # just in case of hipster activation at the final layer
     y_pred = K.clip(y_pred, 0, 1)
@@ -181,16 +186,15 @@ def fbs(y_true, y_pred, threshold_shift=0., beta=1):
     beta_squared = beta ** 2
     return (beta_squared + 1) * (precision * recall) / (beta_squared * precision + recall + K.epsilon())
 
+""" Defines F2-Score """
 def f2_score(y_true, y_pred):
     # fbs throws a confusing error if inputs are not numpy arrays
     y_true, y_pred = np.array(y_true), np.array(y_pred)
     # We need to use average='samples' here, any other average method will generate bogus results
     return fbs(y_true, y_pred, beta=2, average='samples')
 
+""" Instantiate the resnet 50 """
 def instantiate(n_classes, n_dense=1024, resnet_json="resnet50_mod.json", target_size=(256,256,3), verbose=1):
-    """
-    Instantiate the resnet 50.
-    """
     # create the base pre-trained model
     base_model = ResNet50(weights='imagenet', include_top=False, input_shape=target_size)
     # add a global spatial average pooling layer
@@ -212,6 +216,7 @@ def instantiate(n_classes, n_dense=1024, resnet_json="resnet50_mod.json", target
         iOF.write(model_json)
     return base_model, model
 
+""" Finetunes ResNet50 weights with further data augmentation """
 def finetune(base_model, model, X_train, y_train, X_val, y_val,
              epochs_1=1000, patience_1=2,
              patience_lr=1, batch_size=32,
@@ -220,9 +225,6 @@ def finetune(base_model, model, X_train, y_train, X_val, y_val,
              resnet_h5_1="resnet50_fine_tuned_1.h5",
              resnet_h5_check_point_1="resnet50_fine_tuned_check_point_1.h5",
              layer_names_file="resnet50_mod_layer_names.txt", verbose=1):
-    """
-    Finetune the resnet 50.
-    """
     # let's visualize layer names and layer indices to see how many layers
     # we should freeze:
     with open(layer_names_file, "w") as iOF:
