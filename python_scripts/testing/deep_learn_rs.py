@@ -18,15 +18,6 @@ from sklearn.metrics import log_loss, confusion_matrix
 from sklearn.utils import shuffle
 from PIL import Image, ImageChops, ImageOps
 import sys
-#from keras.utils.training_utils import multi_gpu_model
-# construct the argument parse and parse the arguments
-#ap = argparse.ArgumentParser()
-#ap.add_argument("-g", "--gpus", type=int, default=1,
-#	help="# of GPUs to use for training")
-#args = vars(ap.parse_args())
-
-# grab the number of GPUs and store it in a conveience variable
-G =1 #args["gpus"]
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
 import gzip
 import pickle
@@ -164,8 +155,7 @@ def list_pictures(directory, ext='jpg|jpeg|bmp|png|tif'):
             for root, _, files in os.walk(directory) for f in files
             if re.match(r'([\w]+\.(?:' + ext + '))', f)]
 
-def database_image(shape=(256,256,3),
-                   directory="/datastore/complexnet/jlevyabi/ml_soc_econ/data_files/images_suspected_locs/UCMerced_LandUse/full/"):
+def database_image(shape=(256,256,3), directory="/datastore/complexnet/jlevyabi/ml_soc_econ/data_files/images_suspected_locs/UCMerced_LandUse/full/" ):
     images=list_pictures(directory)
     X,y,y_name=[],[],[]
     for im in images:
@@ -320,4 +310,3 @@ finetune(base_model, model, X_train, y_train, X_test, y_test, batch_size=20, epo
          resnet_h5_check_point_1=model_dir+"resnet50_fine_tuned_check_point_1_.h5",
          layer_names_file=model_dir+"resnet50_mod_layer_names.txt",
          verbose=verbose)
-
