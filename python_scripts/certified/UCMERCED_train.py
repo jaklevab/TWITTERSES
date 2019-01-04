@@ -1,7 +1,18 @@
 from __future__ import print_function, division
 import numpy as np
 import random
+import argparse
+from scipy.misc import imresize, imsave
+from tqdm import tqdm as tqdm
+
+import sys
+import gzip
+import pickle
+from collections import Counter
 import os
+from tqdm import tqdm as tqdm
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
+
 import glob
 import datetime
 import pandas as pd
@@ -9,39 +20,25 @@ import time
 import h5py
 import csv
 import re
-from PIL import Image as pil_image
+from PIL import Image, ImageChops, ImageOps
+
 from sklearn.preprocessing import LabelEncoder
-import argparse
-from scipy.misc import imresize, imsave
 from sklearn.cross_validation import KFold, train_test_split
 from sklearn.metrics import log_loss, confusion_matrix
 from sklearn.utils import shuffle
-from PIL import Image, ImageChops, ImageOps
-import sys
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
-import gzip
-import pickle
-from collections import Counter
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import fbeta_score
+
 import keras
 from keras.utils import to_categorical
 from keras.applications.resnet50 import ResNet50
-from keras.preprocessing.image import load_img, img_to_array
-from keras.models import Model, model_from_json
-from keras.layers import Dense, Flatten, Dropout
-from keras import backend as K
-from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
+from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau, Callback
 from keras.applications.imagenet_utils import decode_predictions, preprocess_input
 from keras.optimizers import SGD, Adam
-from sklearn.preprocessing import LabelEncoder
-from sklearn.metrics import fbeta_score
-from tqdm import tqdm as tqdm
-
 from keras import backend as K
-from keras.callbacks import EarlyStopping, Callback
 from keras.utils import np_utils
 from keras.preprocessing.image import ImageDataGenerator, load_img, img_to_array
-from keras import optimizers
-from keras.models import Sequential, model_from_json
+from keras.models import Sequential,Model, model_from_json
 from keras.layers import Convolution2D, MaxPooling2D, ZeroPadding2D, Activation, Dropout, Flatten, Dense
 
 
@@ -155,7 +152,7 @@ def list_pictures(directory, ext='jpg|jpeg|bmp|png|tif'):
             for root, _, files in os.walk(directory) for f in files
             if re.match(r'([\w]+\.(?:' + ext + '))', f)]
 
-def database_image(shape=(256,256,3), directory="/datastore/complexnet/jlevyabi/ml_soc_econ/data_files/images_suspected_locs/UCMerced_LandUse/full/" ):
+def database_image(shape=(256,256,3), directory="/warehouse/COMPLEXNET/jlevyabi/TWITTERSES/ml_soc_econ/data_files/images_suspected_locs/UCMerced_LandUse/full/" ):
     images=list_pictures(directory)
     X,y,y_name=[],[],[]
     for im in images:
@@ -172,7 +169,6 @@ def database_image(shape=(256,256,3), directory="/datastore/complexnet/jlevyabi/
     return X,y,y_name
 
 def fbs(y_true, y_pred, threshold_shift=0., beta=1):
-
     # just in case of hipster activation at the final layer
     y_pred = K.clip(y_pred, 0, 1)
     # shifting the prediction threshold from .5 if needed
@@ -278,35 +274,35 @@ def finetune(base_model, model, X_train, y_train, X_val, y_val,
     model.save_weights(resnet_h5_1)
 
 
-X,encoded,encoded_name=database_image()
-label_encoder = LabelEncoder()
-integer_encoded = label_encoder.fit_transform(encoded)
-y = to_categorical(integer_encoded)
-dic_int_to_label={}
-for lab,nb in zip(encoded,integer_encoded):
-    dic_int_to_label.setdefault(nb,lab)
-
-X_train,X_test,y_train,y_test=train_test_split(X,y,test_size=0.2, random_state=4)
-_,_,name_train,name_test=train_test_split(X,encoded_name,test_size=0.2, random_state=4)
-X_train=np.stack(X_train)
-X_test=np.stack(X_test)
-y_train=np.array(y_train)
-y_test=np.array(y_test)
-
-verbose=1
-model_dir="/datastore/complexnet/jlevyabi/ml_soc_econ/data_files/images_suspected_locs/UCMerced_LandUse/"
-if verbose >= 1:
-    print("\tInstantiating ResNet50 (fold )...")
-n_classes = y_train.shape[1]
-base_model, model = instantiate(n_classes, n_dense=1024, resnet_json=model_dir+"resnet50_mod_.json", target_size=(256,256,3), verbose=verbose)
-#model = multi_gpu_model(model, gpus=G)
-
-if verbose >= 1: print("\tFine-tuning ResNet50 first pass (fold )...")
-finetune(base_model, model, X_train, y_train, X_test, y_test, batch_size=20, epochs_1=200,
-         nb_train_samples=len(y_train), nb_validation_samples=len(y_test),
-         img_width=256, img_height=256,
-         patience_1=100, patience_lr=100, class_imbalance=False,
-         resnet_h5_1=model_dir+"resnet50_fine_tuned_1_.h5",
-         resnet_h5_check_point_1=model_dir+"resnet50_fine_tuned_check_point_1_.h5",
-         layer_names_file=model_dir+"resnet50_mod_layer_names.txt",
-         verbose=verbose)
+if __name__ == "__main__" :
+    X,encoded,encoded_name=database_image()
+    label_encoder = LabelEncoder()
+    integer_encoded = label_encoder.fit_transform(encoded)
+    y = to_categorical(integer_encoded)
+    dic_int_to_label={}
+    for lab,nb in zip(encoded,integer_encoded):
+        dic_int_to_label.setdefault(nb,lab)
+    #
+    X_train,X_test,y_train,y_test=train_test_split(X,y,test_size=0.2, random_state=4)
+    _,_,name_train,name_test=train_test_split(X,encoded_name,test_size=0.2, random_state=4)
+    X_train=np.stack(X_train)
+    X_test=np.stack(X_test)
+    y_train=np.array(y_train)
+    y_test=np.array(y_test)
+    #
+    verbose=1
+    model_dir="/datastore/complexnet/jlevyabi/ml_soc_econ/data_files/images_suspected_locs/UCMerced_LandUse/"
+    if verbose >= 1:
+        print("\tInstantiating ResNet50 (fold )...")
+    n_classes = y_train.shape[1]
+    base_model, model = instantiate(n_classes, n_dense=1024, resnet_json=model_dir+"resnet50_mod_.json", target_size=(256,256,3), verbose=verbose)
+    #
+    if verbose >= 1: print("\tFine-tuning ResNet50 first pass (fold )...")
+    finetune(base_model, model, X_train, y_train, X_test, y_test, batch_size=20, epochs_1=200,
+             nb_train_samples=len(y_train), nb_validation_samples=len(y_test),
+             img_width=256, img_height=256,
+             patience_1=100, patience_lr=100, class_imbalance=False,
+             resnet_h5_1=model_dir+"resnet50_fine_tuned_1_.h5",
+             resnet_h5_check_point_1=model_dir+"resnet50_fine_tuned_check_point_1_.h5",
+             layer_names_file=model_dir+"resnet50_mod_layer_names.txt",
+             verbose=verbose)

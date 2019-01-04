@@ -33,10 +33,9 @@ for usr in tqdm(geo_usrs):
 			print("User %s not found in twitter"%usr)
 			deleted_accounts.append(usr)
 		elif e.api_code==88:
-			print("Maximal requests ")			
+			print("Maximal requests ")
 		else:
 			print(e)
 
 pickle.dump(geo_profiles,open("/datastore/complexnet/jlevyabi/ml_soc_econ/data_files/UKSOC_rep/all_together_profiles.p","wb"))
 pickle.dump(deleted_accounts,open("/datastore/complexnet/jlevyabi/ml_soc_econ/data_files/UKSOC_rep/all_together_profiles_deleted_accounts.p","wb"))
-
