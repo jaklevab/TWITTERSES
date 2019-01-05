@@ -14,7 +14,7 @@ from scipy import sparse
 import sqlite3 as lite
 from collections import Counter
 import json
-from tqdm import tqdm_notebook as tqdm
+from tqdm import tqdm
 import sys
 import os
 import warnings
@@ -88,6 +88,7 @@ def filter_crazy_users(dic,max_km_var,max_km_per_h,nb_mini_locs,nb_min_crazy):
     dic_real_usrs={}
     with pd.option_context('display.max_rows', None, 'display.max_columns', 30):#with con:
         for usr,visits in tqdm(dic.items()):
+            s_name = None
             if (s_name!=None and "maree_info" in s_name[0]):
                 dic_mar[usr]=visits
                 continue

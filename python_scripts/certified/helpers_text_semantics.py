@@ -6,6 +6,8 @@ import unidecode
 import re
 from sklearn.feature_extraction.text import TfidfVectorizer,CountVectorizer
 from nltk.corpus import stopwords
+from tqdm import tqdm
+import pickle
 
 french_stopwords = list(set(stopwords.words('french')))
 eng_stopwords = list(set(stopwords.words('english')))
@@ -51,11 +53,11 @@ def generate_tw_semantic_info(geolocated_tweets,word2topics_dic):
     return usr_text
 
 """ Generates all features for learning models  """
-def generate_full_features(df_profile_tweets,min_tweets,max_prof_fts = 450,max_tweets_fts = 560,nb_topics = 100):
+def generate_full_features(df_usr_profile_tweets,min_tweets,max_prof_fts = 450,max_tweets_fts = 560,nb_topics = 100):
     #Profile Information: Shallow features
     shallow_fts = ["followers_count","friends_count","listed_count", "favourites_count","statuses_count"]
     mat_shallow_bio=np.vstack([np.hstack(sample.as_matrix()).reshape((1,5))
-                                for it,sample in (df_profile_tweets[shallow_fts].iterrows())])
+                                for it,sample in (df_usr_profile_tweets[shallow_fts].iterrows())])
     #Profile Information: N-grams
     n_grams_bio_vect=TfidfVectorizer(stop_words=french_stopwords+eng_stopwords, max_features=max_prof_fts,ngram_range=(1,2),lowercase=True)
     mat_n_grams_bio=n_grams_bio_vect.fit_transform(list(df_usr_profile_tweets.description.values)).todense()

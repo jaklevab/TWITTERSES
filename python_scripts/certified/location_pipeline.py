@@ -27,7 +27,7 @@ def extract_xls_file(path,sheet_name,offset):
     workbook = xlrd.open_workbook(path)
     worksheet = workbook.sheet_by_name(sheet_name)
     rows = []
-    for i, row in (enumerate(range(worksheet.nrows))):
+    for i, row in tqdm(enumerate(range(worksheet.nrows))):
         if i <= offset:  # (Optionally) skip headers
             continue
         r = []
@@ -39,7 +39,7 @@ def extract_xls_file(path,sheet_name,offset):
 """ Yields back GeoDataFrame of geolocated tweets posted within France """
 def geotreatment_french_tweets(data_fname):
     df_geotweets=pd.read_csv(data_fname,sep="\t",header=-1,index_col=False)
-    df_geotweets.columns = ["id","time","lat","lon","geo_pt","service","profile","follows","friends","nb urls","loc_name","geo_type"]
+    df_geotweets.columns = ["id","time","lat","lon","geo_pt","service","profile","follows","friends","tweet","nb urls","loc_name","geo_type"]
     fechas,days,hours,minutes,seconds,years,months=help_loc.time_2_date(df_geotweets.time)
     df_geotweets['day']=days
     df_geotweets['hour']=hours
@@ -48,9 +48,9 @@ def geotreatment_french_tweets(data_fname):
     df_geotweets['year']=years
     df_geotweets['month']=months
     df_geotweets['fecha']=fechas
-    df_geotweets["geometry"]=[Point((float(lon),float(lat))) for lon,lat in zip(df_geotweets.lon,df_geotweets.lat)]
+    df_geotweets["geometry"]=[Point((float(lon),float(lat))) for lon,lat in tqdm(zip(df_geotweets.lon,df_geotweets.lat))]
     df_geotweets=gpd.GeoDataFrame(df_geotweets,crs = {'init': 'epsg:4326'})
-    df_geotweets_france=df_geotweets[[france.contains(geo_pt) for geo_pt in df_geotweets.geometry]]
+    df_geotweets_france=df_geotweets[[france.contains(geo_pt) for geo_pt in tqdm(df_geotweets.geometry)]]
     print("Number of geolocated tweets during 2014-2015... %d geolocations"% df_geotweets.shape[0])
     print("Number of geolocated tweets during 2014-2015 in France... %d geolocations"% df_geotweets_france.shape[0])
     return df_geotweets_france
@@ -63,7 +63,7 @@ def generate_iris_ses_data(f_base="/warehouse/COMPLEXNET/jlevyabi/TWITTERSES/geo
     d_filo_dec_iris = extract_xls_file(f2,"IRIS_DEC",4)
     geo_file = f_base + "contours-iris-2016.geojson"
     df_geo_iris = gpd.read_file(geo_file)
-    d_iris=df_geo_iris[[france.contains(geo_pt) if geo_pt else False for geo_pt in (df_geo_iris.geometry)]]
+    d_iris=df_geo_iris[[france.contains(geo_pt) if geo_pt else False for geo_pt in tqdm(df_geo_iris.geometry)]]
     d_iris['IRIS']=d_iris.code_iris
     dec_income_iris=pd.merge(d_iris, d_filo_dec_iris, on='IRIS')
     return gpd.GeoDataFrame(dec_income_iris,crs = {'init': 'epsg:4326'})
