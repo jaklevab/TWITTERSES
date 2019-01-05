@@ -12,7 +12,6 @@ from pyproj import Proj, transform
 from scipy.spatial import cKDTree
 from scipy import sparse
 import sqlite3 as lite
-from collections import Counter
 import json
 from tqdm import tqdm
 import sys
@@ -288,7 +287,7 @@ def distance_to_home(geopandas_usr,select_home_loc,args):
 """ Gathers all locations per user in a dictionary """
 def go_through_home_candidates(dic_gpd,select_home_loc):
     dic_exam={}
-    for usr,gpd in tqdmn(dic_gpd.items()):
+    for usr,gpd in tqdm(dic_gpd.items()):
         idx,loc=select_home_loc(gpd)
         if idx is None:
             continue
@@ -301,7 +300,7 @@ def go_through_geol_users(dic_gpd,select_home_loc,args,outlier_lim=6e4):
     dic_nb_per_day={k:np.zeros(24) for k in range(7)}
     dic_exam={}
     loss=[]
-    for usr,gpd in tqdmn(dic_gpd.items()):
+    for usr,gpd in tqdm(dic_gpd.items()):
         dic_exam.setdefault(usr,[])
         dists,days,hours=distance_to_home(gpd,select_home_loc,args)
         new_dists=np.array(dists)

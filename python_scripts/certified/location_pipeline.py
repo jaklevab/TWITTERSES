@@ -7,7 +7,7 @@ import xlrd
 import json
 from collections import Counter
 
-from tqdm import tqdm_notebook as tqdmn
+from tqdm import tqdm
 from shapely.geometry import Point
 from shapely.geometry.polygon import Polygon
 import geopandas as gpd
@@ -39,11 +39,11 @@ def extract_xls_file(path,sheet_name,offset):
 """ Yields back GeoDataFrame of geolocated tweets posted within France """
 def geotreatment_french_tweets(data_fname):
     df_geotweets=pd.read_csv(data_fname,sep="\t",header=-1,index_col=False)
-    df_geotweets.columns = ["id","time","lat","lon","geo_pt","service","profile","follows","friends","tweet","nb urls","loc_name","geo_type"]
+    df_geotweets.columns = ["id","time","lat","lon","geo_pt","service","profile","follows","friends","tweet","nb urls"]
     fechas,days,hours,minutes,seconds,years,months=help_loc.time_2_date(df_geotweets.time)
     df_geotweets['day']=days
     df_geotweets['hour']=hours
-    df_geotweets['min']=minutes
+    df_geotweets['minu']=minutes
     df_geotweets['sec']=seconds
     df_geotweets['year']=years
     df_geotweets['month']=months
@@ -61,7 +61,7 @@ def generate_iris_ses_data(f_base="/warehouse/COMPLEXNET/jlevyabi/TWITTERSES/geo
     d_filo_disp_iris = extract_xls_file(f1,"IRIS_DISP",4)
     f2 = f_base + "BASE_TD_FILO_DEC_IRIS_2013.xls"
     d_filo_dec_iris = extract_xls_file(f2,"IRIS_DEC",4)
-    geo_file = f_base + "contours-iris-2016.geojson"
+    geo_file = f_base + "shapefile_iris/contours-iris-2016.geojson"
     df_geo_iris = gpd.read_file(geo_file)
     d_iris=df_geo_iris[[france.contains(geo_pt) if geo_pt else False for geo_pt in tqdm(df_geo_iris.geometry)]]
     d_iris['IRIS']=d_iris.code_iris
@@ -74,7 +74,7 @@ def reliable_home_location(usrs_with_SES_info_dic,max_km_var=10,max_km_per_h=120
                                                                        max_km_per_h=max_km_per_h,nb_mini_locs=nb_mini_locs,nb_min_crazy=nb_min_crazy)
     new_dic_real, _ = help_loc.remove_hyperactive_usrs(dic_locs_reals,pandas_version=0,thresh_rate=thresh_rate)
     new_dic_real, _ = help_loc.remove_hyper_social_usrs(dic_real=new_dic_real)
-    dic_pd = {k:pd.DataFrame(v,columns=["lat","lon","day","hour","minu","sec","year","month","fecha"]) for k,v in tqdmn(new_dic_real.items())}
+    dic_pd = {k:pd.DataFrame(v,columns=["lat","lon","day","hour","minu","sec","year","month","fecha"]) for k,v in tqdm(new_dic_real.items())}
     home_most_freq_all = help_loc.go_through_home_candidates(new_dic_real,help_loc.take_most_frequent_thresh)
     home_most_freq_night = help_loc.go_through_home_candidates(new_dic_real,help_loc.take_most_frequent_night_thresh)
     dic_all_users_insee={usr:{"profile":(new_dic_real[usr].profile),
@@ -102,16 +102,16 @@ if __name__ == '__main__':
     usr_tweet_text = help_txt.generate_tw_semantic_info(base_dir + "data_files/UKSOC_rep/tweets/all_geolocated_users.csv",d100)
     usr_profile_data = help_txt.generate_profile_information()
     df_usr_profile_tweets = pd.merge(usr_profile_data,usr_tweet_text,left_on="id",right_on="user_id")
-    df_usr_profile_tweets = help_txt.generate_full_features(df_usr_profile_tweets)
+    df_usr_profile_tweets = help_txt.generate_full_features(df_usr_profile_tweets,min_tweets=50)
     #
     # Location Filtering + SES enrichment
     usrs_with_iris_income = gpd.sjoin(data_geo_france, dec_income_iris,how="inner", op='within')
     usrs_with_SES_info_dic={}
-    for it,row in tqdmn(usrs_with_SES_info.iterrows()):
-        usrs_with_SES_info_dic.setdefault(row.id,[])
-        usrs_with_SES_info_dic[row.id].append(usrs_with_SES_info.iloc[it])
-    for usr,val in tqdmn(usrs_with_SES_info_dic.items()):
-        usrs_with_SES_info_dic[usr]=pd.DataFrame(val,columns=list(usrs_with_SES_info.columns))
+    for it,row in tqdm(usrs_with_iris_income.iterrows()):
+        _=usrs_with_SES_info_dic.setdefault(row.id,[]);
+        usrs_with_SES_info_dic[row.id].append(row)
+    for usr,val in tqdm(usrs_with_SES_info_dic.items()):
+        usrs_with_SES_info_dic[usr]=pd.DataFrame(val,columns=list(usrs_with_iris_income.columns))
     usr2ses = reliable_home_location(usrs_with_SES_info_dic)
     ses_text_insee=pd.merge(df_usr_profile_tweets,usr2ses,left_on="id",right_on="usr")
     ses_text_insee.dropna(subset=["insee_iris_med"],inplace=True)
@@ -119,4 +119,4 @@ if __name__ == '__main__':
     mat_info=np.vstack([np.hstack(sample.as_matrix()).reshape((1,len(ses_text_insee.iloc[0]["fts"])))
                         for it,sample in (ses_text_insee[["fts",]].iterrows())])
     X = StandardScaler().fit_transform(mat_info)
-    print(help_class.generate_full_features(X, ses_insee_class))
+    print(help_class.test_all_models(X, ses_insee_class))
