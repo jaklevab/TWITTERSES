@@ -6,6 +6,7 @@ from xgboost import XGBClassifier
 from tqdm import tqdm
 import numpy as np
 from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 import pandas as pd
 
@@ -51,8 +52,8 @@ def cv_classify_data(X, y, rd_seed,model,param_distributions, n_splits = 5, n_re
     cv_classif = RepeatedStratifiedKFold(n_splits=n_splits, n_repeats=n_repeats)
     scorer_classif = make_scorer(roc_auc_score, greater_is_better=True, needs_threshold=True)
     model_classif = RandomizedSearchCV(model, param_distributions, n_iter=n_iter,scoring=scorer_classif, n_jobs=n_jobs, cv=cv_classif, verbose=verbose)
-    model.fit(X_train, y_train)
-    model_best=model.best_estimator_
+    model_classif.fit(X_train, y_train)
+    model_best=model_classif.best_estimator_
     model_best.fit(X_train,y_train)
     probs = model_best.predict_proba(X_test)
     preds = probs[:,1]

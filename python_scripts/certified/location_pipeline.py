@@ -83,10 +83,10 @@ def reliable_home_location(usrs_with_SES_info_dic,max_km_var=10,max_km_per_h=120
                               "suppl_info":home_most_freq_all[usr]}
                          for usr in tqdm(home_most_freq_all.keys())}
     #
-    usr2ses=pd.DataFrame([[k,v["suppl_info"]["income"],v["suppl_info"]["DEC_D113"],
+    usr2ses=pd.DataFrame([[k,v["suppl_info"]["DEC_D113"],
                        v["suppl_info"]["DEC_MED13"],v["suppl_info"]["DEC_D913"]]
                       for k,v in dic_all_users_insee.items()],
-                      columns=["usr","insee_income","insee_iris_lowe",
+                      columns=["usr","insee_iris_lowe",
                                "insee_iris_med","insee_iris_sup"]).dropna(how="any")
     return usr2ses
 
@@ -115,8 +115,8 @@ if __name__ == '__main__':
     usr2ses = reliable_home_location(usrs_with_SES_info_dic)
     ses_text_insee=pd.merge(df_usr_profile_tweets,usr2ses,left_on="id",right_on="usr")
     ses_text_insee.dropna(subset=["insee_iris_med"],inplace=True)
-    ses_insee_class=np.array(ses_text_insee.insee_income> np.nanmean(ses_text_insee.insee_income)).astype(np.int)# 2 class
+    ses_insee_class=np.array(ses_text_insee.insee_iris_med> np.nanmean(ses_text_insee.insee_iris_med)).astype(np.int)# 2 class
     mat_info=np.vstack([np.hstack(sample.as_matrix()).reshape((1,len(ses_text_insee.iloc[0]["fts"])))
                         for it,sample in (ses_text_insee[["fts",]].iterrows())])
     X = StandardScaler().fit_transform(mat_info)
-    print(help_class.test_all_models(X, ses_insee_class))
+    dic_res=help_class.test_all_models(X, ses_insee_class)
