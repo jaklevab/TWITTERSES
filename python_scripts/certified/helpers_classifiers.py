@@ -1,7 +1,7 @@
 import pickle
 from sklearn.metrics import roc_auc_score, brier_score_loss, make_scorer, f1_score, fbeta_score, precision_score, recall_score, roc_curve
 from sklearn.model_selection import RandomizedSearchCV, RepeatedStratifiedKFold, cross_validate, train_test_split
-from scipy.stats import uniform
+from scipy.stats import uniform,expon
 from xgboost import XGBClassifier
 from tqdm import tqdm
 import numpy as np
@@ -12,10 +12,12 @@ import pandas as pd
 
 """ Model Definition for cross_validation"""
 def generate_standard_model(model_str,rd_seed, n_splits = 5, n_repeats = 5, n_iter = 500, n_jobs = 90, verbose = 1):
+    cv_classif = RepeatedStratifiedKFold(n_splits=n_splits, n_repeats=n_repeats)
+    scorer_classif = make_scorer(roc_auc_score, greater_is_better=True, needs_threshold=True)
     if model_str == "svm":
         model = SVC()
-        param_distributions = {'C': 10**np.random.uniform(low=-5,high=1),
-                               'gamma': 10**np.random.uniform(low=-5,high=1),
+        param_distributions = {'C': expon(loc=10**(-5), scale=0.1),
+                               'gamma': expon(loc=10**(-5), scale=0.1),
                                 'degree': range(1,4),
                                 'kernel': ["linear", "poly", "rbf", "sigmoid"]}
     elif model_str == "adaboost":
@@ -44,8 +46,7 @@ def generate_standard_model(model_str,rd_seed, n_splits = 5, n_repeats = 5, n_it
                                "reg_lambda": uniform(loc=0.8, scale=0.2)}
     else:
         raise ValueError(" Model not among the proposed one")
-    cv_classif = RepeatedStratifiedKFold(n_splits=n_splits, n_repeats=n_repeats)
-    scorer_classif = make_scorer(roc_auc_score, greater_is_better=True, needs_threshold=True)
+
     model_classif = RandomizedSearchCV(model, param_distributions, n_iter=n_iter,scoring=scorer_classif, n_jobs=n_jobs, cv=cv_classif, verbose=verbose)
     return model_classif
 
@@ -53,6 +54,7 @@ def generate_standard_model(model_str,rd_seed, n_splits = 5, n_repeats = 5, n_it
 def cv_classify_data(X, y, rd_seed,model_str,frac_test = .2,):
     X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=frac_test,random_state=rd_seed)
     model_classif = generate_standard_model(model_str,rd_seed)
+    print (model_classif)
     model_classif.fit(X_train, y_train)
     model_best=model_classif.best_estimator_
     model_best.fit(X_train,y_train)
