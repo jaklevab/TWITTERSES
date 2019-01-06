@@ -120,3 +120,4 @@ if __name__ == '__main__':
                         for it,sample in (ses_text_insee[["fts",]].iterrows())])
     X = StandardScaler().fit_transform(mat_info)
     dic_res=help_class.test_all_models(X, ses_insee_class)
+    pickle.dump(dic_res, open( "/warehouse/COMPLEXNET/jlevyabi/tmp/iris_test.p", "wb" ) )

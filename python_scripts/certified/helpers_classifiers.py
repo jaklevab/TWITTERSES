@@ -54,7 +54,6 @@ def generate_standard_model(model_str,rd_seed, n_splits = 5, n_repeats = 5, n_it
 def cv_classify_data(X, y, rd_seed,model_str,frac_test = .2,):
     X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=frac_test,random_state=rd_seed)
     model_classif = generate_standard_model(model_str,rd_seed)
-    print (model_classif)
     model_classif.fit(X_train, y_train)
     model_best=model_classif.best_estimator_
     model_best.fit(X_train,y_train)
