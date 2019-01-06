@@ -1,5 +1,5 @@
 import pickle
-from sklearn.metrics import roc_auc_score, brier_score_loss, make_scorer, f1_score, fbeta_score, precision_score, recall_score, roc_curve
+from sklearn.metrics import roc_auc_score, brier_score_loss, make_scorer, f1_score, fbeta_score, precision_score, recall_score, roc_curve, auc
 from sklearn.model_selection import RandomizedSearchCV, RepeatedStratifiedKFold, cross_validate, train_test_split
 from scipy.stats import uniform,expon
 from xgboost import XGBClassifier
@@ -58,9 +58,9 @@ def cv_classify_data(X, y, rd_seed,model_str,frac_test = .2,):
     model_best.fit(X_train,y_train)
     probs = model_best.predict_proba(X_test)
     preds = probs[:,1]
-    fpr, tpr, threshold = metrics.roc_curve(y_test, preds)
-    roc_auc = metrics.auc(fpr, tpr)
-    return (model_best.best_params_, model_best.best_score_, fpr, tpr, threshold, roc_auc)
+    fpr, tpr, threshold = roc_curve(y_test, preds)
+    roc_auc = auc(fpr, tpr)
+    return (model_classif.best_params_, model_classif.best_score_, fpr, tpr, threshold, roc_auc)
 
 """ Outer Cross-Validation Loop """
 def outer_cv_loop(X, y, model_str, nb_rep_test = 2):
