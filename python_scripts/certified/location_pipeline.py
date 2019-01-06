@@ -78,7 +78,7 @@ def reliable_home_location(usrs_with_SES_info_dic,max_km_var=10,max_km_per_h=120
     home_most_freq_all = help_loc.go_through_home_candidates(new_dic_real,help_loc.take_most_frequent_thresh)
     home_most_freq_night = help_loc.go_through_home_candidates(new_dic_real,help_loc.take_most_frequent_night_thresh)
     dic_all_users_insee={usr:{"profile":(new_dic_real[usr].profile),
-                              "locations":new_dic_real[usr][["lat","lon","text","day", "hour","minu","sec", "year","month","fecha", "geo_pt","service"]],
+                              "locations":new_dic_real[usr][["lat","lon","tweet","day", "hour","minu","sec", "year","month","fecha", "geo_pt","service"]],
                               "inferred_loc":home_most_freq_all[usr][["lat","lon"]],
                               "suppl_info":home_most_freq_all[usr]}
                          for usr in tqdm(home_most_freq_all.keys())}
