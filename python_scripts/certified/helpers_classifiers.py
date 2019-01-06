@@ -11,7 +11,7 @@ from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 import pandas as pd
 
 """ Model Definition for cross_validation"""
-def generate_standard_model(model_str,rd_seed, n_splits = 5, n_repeats = 5, n_iter = 500, n_jobs = 90, verbose = 1):
+def generate_standard_model(model_str,rd_seed, n_splits = 5, n_repeats = 5, n_iter = 250, n_jobs = 93, verbose = 1):
     cv_classif = RepeatedStratifiedKFold(n_splits=n_splits, n_repeats=n_repeats)
     scorer_classif = make_scorer(roc_auc_score, greater_is_better=True, needs_threshold=True)
     if model_str == "svm":
@@ -46,7 +46,6 @@ def generate_standard_model(model_str,rd_seed, n_splits = 5, n_repeats = 5, n_it
                                "reg_lambda": uniform(loc=0.8, scale=0.2)}
     else:
         raise ValueError(" Model not among the proposed one")
-
     model_classif = RandomizedSearchCV(model, param_distributions, n_iter=n_iter,scoring=scorer_classif, n_jobs=n_jobs, cv=cv_classif, verbose=verbose)
     return model_classif
 
@@ -64,8 +63,9 @@ def cv_classify_data(X, y, rd_seed,model_str,frac_test = .2,):
     return (model_best.best_params_, model_best.best_score_, fpr, tpr, threshold, roc_auc)
 
 """ Outer Cross-Validation Loop """
-def outer_cv_loop(X, y, model_str, nb_rep_test = 5):
+def outer_cv_loop(X, y, model_str, nb_rep_test = 2):
     dic_res={"best_params":[],"best_score":[],"auc":[],"fpr":[],"tpr":[],"threshold":[]}
+    print("Fitting Model: %s ...."%model_str)
     for i in tqdm(range(1,nb_rep_test+1)):
         best_params, best_score, fpr, tpr, threshold, roc_auc = cv_classify_data(X, y, i,model_str)
         dic_res["best_params"].append(best_params)
@@ -78,4 +78,4 @@ def outer_cv_loop(X, y, model_str, nb_rep_test = 5):
 
 """ Compute performance metrics over all models for chosen data"""
 def test_all_models(X, y):
-    return {model_name: outer_cv_loop(X, y, model_name) for model_name in ["svm","adaboost","rforest","xgb"]}
+    return {model_name: outer_cv_loop(X, y, model_name) for model_name in ["rforest","xgb"]}
