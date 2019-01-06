@@ -11,7 +11,7 @@ from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 import pandas as pd
 
 """ Model Definition for cross_validation"""
-def generate_standard_model(model_str,rd_seed):
+def generate_standard_model(model_str,rd_seed, n_splits = 5, n_repeats = 5, n_iter = 500, n_jobs = 90, verbose = 1):
     if model_str == "svm":
         model = SVC()
         param_distributions = {'C': 10**np.random.uniform(low=-5,high=1),
@@ -44,14 +44,15 @@ def generate_standard_model(model_str,rd_seed):
                                "reg_lambda": uniform(loc=0.8, scale=0.2)}
     else:
         raise ValueError(" Model not among the proposed one")
-    return model, param_distributions
-
-""" Inner Cross-Validation Loop """
-def cv_classify_data(X, y, rd_seed,model,param_distributions,frac_test = .2,  n_splits = 5, n_repeats = 5, n_iter = 500, n_jobs = 90, verbose = 1):
-    X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=frac_test,random_state=rd_seed)
     cv_classif = RepeatedStratifiedKFold(n_splits=n_splits, n_repeats=n_repeats)
     scorer_classif = make_scorer(roc_auc_score, greater_is_better=True, needs_threshold=True)
     model_classif = RandomizedSearchCV(model, param_distributions, n_iter=n_iter,scoring=scorer_classif, n_jobs=n_jobs, cv=cv_classif, verbose=verbose)
+    return model_classif
+
+""" Inner Cross-Validation Loop """
+def cv_classify_data(X, y, rd_seed,model_str,frac_test = .2,):
+    X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=frac_test,random_state=rd_seed)
+    model_classif = generate_standard_model(model_str,rd_seed)
     model_classif.fit(X_train, y_train)
     model_best=model_classif.best_estimator_
     model_best.fit(X_train,y_train)
@@ -65,9 +66,7 @@ def cv_classify_data(X, y, rd_seed,model,param_distributions,frac_test = .2,  n_
 def outer_cv_loop(X, y, model_str, nb_rep_test = 5):
     dic_res={"best_params":[],"best_score":[],"auc":[],"fpr":[],"tpr":[],"threshold":[]}
     for i in tqdm(range(1,nb_rep_test+1)):
-        model, param_distributions = generate_standard_model(model_str, i)
-        print(model,param_distributions,X.shape,y.shape)
-        best_params, best_score, fpr, tpr, threshold, roc_auc = cv_classify_data(X, y, i,model,param_distributions)
+        best_params, best_score, fpr, tpr, threshold, roc_auc = cv_classify_data(X, y, i,model_str)
         dic_res["best_params"].append(best_params)
         dic_res["best_score"].append(best_score)
         dic_res["fpr"].append(fpr)
