@@ -14,7 +14,7 @@ from sklearn.metrics import classification_report
 import helpers_classifiers as help_class
 import helpers_text_semantics as help_txt
 
-f __name__ == '__main__':
+if __name__ == '__main__':
     #Data Generation
     #
     ## Location + SES
