@@ -63,11 +63,10 @@ def generate_insee_ses_data(f_data="/warehouse/COMPLEXNET/jlevyabi/TWITTERSES/ge
     geo_insee_dic={}
     for it,row in geo_insee.iterrows():
         center_x,center_y=map(map_prec,row.geometry.centroid.bounds[:2])
-        if cx=="-0.0":
-            cx="0.0"
-        _=geo_insee_dic.setdefault((cy,cx),[])
-        geo_insee_dic[(cy,cx)].append(row)
-
+        if center_x=="-0.0":
+            center_x="0.0"
+        _=geo_insee_dic.setdefault((center_y,center_x),[])
+        geo_insee_dic[(center_y,center_x)].append(row)
     # Divide original GeoDF into small geodfs for each patch of territory
     return {k:GeoDataFrame(v,crs={'init': 'epsg:4326'},columns=["geometry"]) for k,v in geo_insee_dic.items()}
 
