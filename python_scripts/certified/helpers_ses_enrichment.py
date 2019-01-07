@@ -72,6 +72,7 @@ def generate_insee_ses_data(f_data="/warehouse/COMPLEXNET/jlevyabi/TWITTERSES/ge
 
 """ Optimized Cythonized Spatial Join for INSEE """
 def insee_sjoin(usr_df,country_dic,prec=2):
+    step=10**(-prec)
     set_keys = list(country_dic.keys())
     vals = [-step,0,step]
     step=10**(-prec)
