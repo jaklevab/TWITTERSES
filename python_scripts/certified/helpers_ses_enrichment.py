@@ -72,14 +72,12 @@ def generate_insee_ses_data(f_data="/warehouse/COMPLEXNET/jlevyabi/TWITTERSES/ge
 
 """ Optimized Cythonized Spatial Join for INSEE """
 def insee_sjoin(usr_df,country_dic,prec=2):
-    step=10**(-prec)
-    set_keys = list(country_dic.keys())
-    vals = [-step,0,step]
-    step=10**(-prec)
+    insee_corresp = [];step=10**(-prec);step=10**(-prec);vals = [-step,0,step]
+    set_keys = set(country_dic.keys())
     map_prec = lambda x: str(round(x,prec))
-    insee_corresp = []
-    for usr in tqdm(usr_df.geometry):
-        us_posx,us_posy=usr.centroid.bounds[:2]
+    for it,usr in tqdm(usr_df.iterrows()):
+        us_posx,us_posy=usr.geometry.centroid.bounds[:2]
+        usr_geom = usr.geometry._geom
         keys=set([(map_prec(us_posy+yval),map_prec(us_posx+xval)) for xval in vals for yval in vals]).intersection(set_keys)
         pre_df_of_concern=[country_dic[key] for key in keys if country_dic[key].shape[0]>0]
         geom_to_check=[y._geom for x in pre_df_of_concern for y in x.geometry]
@@ -87,7 +85,7 @@ def insee_sjoin(usr_df,country_dic,prec=2):
         if len(geom_to_check)==0:
             insee_corresp.append(None)
             continue
-        _,poly=np.where(contains_cy_insee(np.array([usr._geom]), np.array(geom_to_check)))
+        _,poly=np.where(contains_cy_insee(np.array([usr_geom]), np.array(geom_to_check)))
         if len(poly)==0:
             insee_corresp.append(None)
         else:
