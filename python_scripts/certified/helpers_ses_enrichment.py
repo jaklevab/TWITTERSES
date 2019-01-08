@@ -54,7 +54,7 @@ def generate_insee_ses_data(f_data="/warehouse/COMPLEXNET/jlevyabi/TWITTERSES/ge
     pat = re.compile(r'''(-*\d+\.\d+ -*\d+\.\d+);*''')
     new_geo=[]
     presentable_insee_df=pd.read_csv(f_data,sep=";")
-    presentable_insee_df.rename({"Unnamed: 0":"position"},inplace=True)
+    presentable_insee_df.rename({"Unnamed: 0":"position"},axis=1,inplace=True)
     new_geo = [Polygon([tuple(map(float, m.split())) for m in pat.findall(geo)])
                        if pat.findall(geo) else None for geo in tqdm(presentable_insee_df.geometry)]
     presentable_insee_df=presentable_insee_df.convert_objects(convert_numeric=True)

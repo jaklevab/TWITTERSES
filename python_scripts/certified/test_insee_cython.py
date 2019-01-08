@@ -1,3 +1,4 @@
+import time
 import re
 import pandas as pd
 import numpy as np
@@ -33,4 +34,9 @@ france=Polygon([[-4.9658203125,42.3585439175],[8.4375,42.3585439175],
 data_prof_14["geometry"]=[Point(x.lon,x.lat) for it,x in tqdm(data_prof_14[["lon","lat"]].iterrows())]
 dgeo_prof_france_14=data_prof_14[[france.contains(geo_pt) for geo_pt in data_prof_14.geometry]]
 print("CYTHON TEST ...")
+start_time = time.time()
 loc2insee=help_ses.insee_sjoin(dgeo_prof_france_14,geo_insee_dic)
+elapsed_time = time.time() - start_time
+start_time = time.time()
+elapsed_time = time.time() - start_time
+
