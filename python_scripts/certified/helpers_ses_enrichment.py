@@ -100,7 +100,6 @@ def reliable_home_location(usrs_with_SES_info_dic,income_str,max_km_var=10,max_k
     new_dic_real, _ = help_loc.remove_hyper_social_usrs(dic_real=new_dic_real)
     dic_pd = {k:pd.DataFrame(v,columns=["lat","lon","day","hour","minu","sec","year","month","fecha"]) for k,v in tqdm(new_dic_real.items())}
     home_most_freq_all = help_loc.go_through_home_candidates(new_dic_real,help_loc.take_most_frequent_thresh)
-    home_most_freq_night = help_loc.go_through_home_candidates(new_dic_real,help_loc.take_most_frequent_night_thresh)
     dic_all_users_insee={usr:{"profile":(new_dic_real[usr].profile),
                               "locations":new_dic_real[usr][["lat","lon","tweet","day", "hour","minu","sec", "year","month","fecha", "geo_pt","service"]],
                               "inferred_loc":home_most_freq_all[usr][["lat","lon"]],

@@ -67,4 +67,3 @@ if __name__ == '__main__':
                no_rt_data_pd.to_csv(output_file, header=True,index=False,sep=";")
            with open(output_file, 'a') as f:
                no_rt_data_pd.to_csv(f, header=False,index=False,sep=";")
-
