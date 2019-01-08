@@ -1,5 +1,5 @@
 # Optimal Proxy Selection for Socioeconomic Status Inference on Twitter
-This repository contains code related to the paper [optimal proxy selection for socioeconomic status inference on Twitter](http://perso.ens-lyon.fr/marton.karsai/) A lighter version of this work was published in the proceedings of the [ICDM 18]((http://lisi.io/iwsc2018/) workshops. 
+This repository contains code related to the paper [optimal proxy selection for socioeconomic status inference on Twitter](http://perso.ens-lyon.fr/marton.karsai/). A lighter version of this work was published in the proceedings of the [ICDM 18]((http://lisi.io/iwsc2018/) workshops. 
 
 This repository contains the `Python` codes needed to apply the inference pipeline to similar demographic-enriched twitter data samples.
 
@@ -10,4 +10,4 @@ This repository contains the `Python` codes needed to apply the inference pipeli
 ### Citation
 If you use the code, data, or analysis results in this paper, we kindly ask that you cite the paper above as:
 
-_ Optimal proxy selection for socioeconomic status inference on Twitter_. J. Levy Abitbol, E. Fleury, M. Karsai, 2019. In Special Issue on Analysis and Applications of Location-Aware Big Complex Network Data, Complexity, Wiley-Hindawi. 
+_ Optimal proxy selection for socioeconomic status inference on Twitter_. J. Levy Abitbol, E. Fleury, M. Karsai, 2019. In Special Issue on Analysis and Applications of Location-Aware Big Complex Network Data, Complexity, Wiley-Hindawi._
