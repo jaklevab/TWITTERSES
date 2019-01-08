@@ -4,9 +4,14 @@ This repository contains code related to the paper [optimal proxy selection for 
 This repository contains the `Python` codes needed to apply the inference pipeline to similar demographic-enriched twitter data samples.
 
 * code to generate semantics features, reliable home locations and ses-enriched datasets from users tweets and census, is in the [helpers](./python_scripts/certified) folder
-<img src="./imags/Fig_topiccorrs.png" width="45%">
-<img src="./imags/Fig_gmap_see.png" width="45%">
+
+<p float="left">
+  <img src="./imags/Fig_topiccorrs.png" width="48%"/>
+  <img src="./imags/Fig_gmap_see.png" width="48%"/>
+</p>
+
 * `Keras` implementations of the `ResNet50` used in this paper to select residential sites are in the [classifier](./python_scripts/certified) folder (with a `TensorFlow` backend)
+
 * code to train and validate the models, for each socioeconomic proxy in the [pipelines](./python_scripts/certified) folder.
 
 
