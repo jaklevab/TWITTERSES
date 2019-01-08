@@ -68,7 +68,7 @@ def generate_insee_ses_data(f_data="/warehouse/COMPLEXNET/jlevyabi/TWITTERSES/ge
         _=geo_insee_dic.setdefault((center_y,center_x),[])
         geo_insee_dic[(center_y,center_x)].append(row)
     # Divide original GeoDF into small geodfs for each patch of territory
-    return {k:GeoDataFrame(v,crs={'init': 'epsg:4326'},columns=["geometry"]) for k,v in geo_insee_dic.items()}
+    return {k:GeoDataFrame(v,crs={'init': 'epsg:4326'}) for k,v in geo_insee_dic.items()}
 
 """ Optimized Cythonized Spatial Join for INSEE """
 def insee_sjoin(usr_df,country_dic,prec=2):
