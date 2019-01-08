@@ -10,4 +10,4 @@ This repository contains the `Python` codes needed to apply the inference pipeli
 ### Citation
 If you use the code, data, or analysis results in this paper, we kindly ask that you cite the paper above as:
 
-_ Optimal proxy selection for socioeconomic status inference on Twitter_. J. Levy Abitbol, E. Fleury, M. Karsai, 2019. In Special Issue on Analysis and Applications of Location-Aware Big Complex Network Data, Complexity, Wiley-Hindawi._
+> _Optimal proxy selection for socioeconomic status inference on Twitter_ , J. Levy Abitbol, E. Fleury, M. Karsai, 2019. In Special Issue on Analysis and Applications of Location-Aware Big Complex Network Data, Complexity, Wiley-Hindawi.
