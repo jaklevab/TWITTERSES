@@ -68,13 +68,16 @@ def generate_insee_ses_data(f_data="/warehouse/COMPLEXNET/jlevyabi/TWITTERSES/ge
         _=geo_insee_dic.setdefault((center_y,center_x),[])
         geo_insee_dic[(center_y,center_x)].append(row)
     # Divide original GeoDF into small geodfs for each patch of territory
-    return {k:GeoDataFrame(v,crs={'init': 'epsg:4326'}) for k,v in geo_insee_dic.items()}
+    return (geo_insee,{k:GeoDataFrame(v,crs={'init': 'epsg:4326'}) for k,v in geo_insee_dic.items()})
 
 """ Optimized Cythonized Spatial Join for INSEE """
-def insee_sjoin(usr_df,country_dic,prec=2):
+def insee_sjoin(usr_df,country_info,prec=2):
+    country_df, country_dic = country_info
     insee_corresp = [];step=10**(-prec);step=10**(-prec);vals = [-step,0,step]
     set_keys = set(country_dic.keys())
     map_prec = lambda x: str(round(x,prec))
+    nb_vars=country_df.shape[1]
+    all_together=[]
     for it,usr in tqdm(usr_df.iterrows()):
         us_posx,us_posy=usr.geometry.centroid.bounds[:2]
         usr_geom = usr.geometry._geom
@@ -90,7 +93,26 @@ def insee_sjoin(usr_df,country_dic,prec=2):
             insee_corresp.append(None)
         else:
             insee_corresp.append(df_ilocs_concern[poly[0]])
-    return insee_corresp
+    #
+    for index in tqdmn(loc2insee):
+        if not(index is None):
+            insee_value=geo_insee.iloc[index]
+            all_together.append(insee_value.values.tolist())
+        else:
+            all_together.append([None for i in range(nb_vars)])
+    #
+    insee_df=pd.DataFrame(all_together)
+    insee_df.columns=country_df.columns
+    usrs_with_INSEE_income=pd.concat([usr_df.reset_index(drop=False),insee.reset_index(drop=False)],ignore_index=True,axis=1)
+    insee_cols=list(insee_df.columns)
+    insee_cols[2]="insee_id"
+    insee_cols[-2]="geometry_poly"
+    usrs_with_INSEE_income.columns=list(usr_df.columns)+insee_cols
+    usrs_with_INSEE_income["income"]=usrs_with_INSEE_income["ind_srf"]/usrs_with_INSEE_income["ind_r"]
+    usrs_with_INSEE_income["owner_ratio"]=usrs_with_INSEE_income["men_prop"]/usrs_with_INSEE_income["ind_r"]
+    usrs_with_INSEE_income["density"]=usrs_with_INSEE_income["ind_r"]/(0.04*usrs_with_INSEE_income["nbcar_x"])
+    usrs_with_INSEE_income.drop(["Unnamed: 0","nbcar_x"],axis=1,inplace=True);
+    return usrs_with_INSEE_income
 
 """ Filters out non-reliable users and computes home location"""
 def reliable_home_location(usrs_with_SES_info_dic,income_str,max_km_var=10,max_km_per_h=120,nb_mini_locs=5,nb_min_crazy=20,thresh_rate=3):
