@@ -94,7 +94,7 @@ def insee_sjoin(usr_df,country_info,prec=2):
         else:
             insee_corresp.append(df_ilocs_concern[poly[0]])
     #
-    for index in tqdmn(loc2insee):
+    for index in tqdm(loc2insee):
         if not(index is None):
             insee_value=geo_insee.iloc[index]
             all_together.append(insee_value.values.tolist())
