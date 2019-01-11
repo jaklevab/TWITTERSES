@@ -94,16 +94,16 @@ def insee_sjoin(usr_df,country_info,prec=2):
         else:
             insee_corresp.append(df_ilocs_concern[poly[0]])
     #
-    for index in tqdm(loc2insee):
+    for index in tqdm(insee_corresp):
         if not(index is None):
-            insee_value=geo_insee.iloc[index]
+            insee_value=country_df.iloc[index]
             all_together.append(insee_value.values.tolist())
         else:
             all_together.append([None for i in range(nb_vars)])
     #
     insee_df=pd.DataFrame(all_together)
     insee_df.columns=country_df.columns
-    usrs_with_INSEE_income=pd.concat([usr_df.reset_index(drop=False),insee.reset_index(drop=False)],ignore_index=True,axis=1)
+    usrs_with_INSEE_income=pd.concat([usr_df.reset_index(drop=True),insee_df.reset_index(drop=True)],ignore_index=True,axis=1)
     insee_cols=list(insee_df.columns)
     insee_cols[2]="insee_id"
     insee_cols[-2]="geometry_poly"
@@ -111,7 +111,7 @@ def insee_sjoin(usr_df,country_info,prec=2):
     usrs_with_INSEE_income["income"]=usrs_with_INSEE_income["ind_srf"]/usrs_with_INSEE_income["ind_r"]
     usrs_with_INSEE_income["owner_ratio"]=usrs_with_INSEE_income["men_prop"]/usrs_with_INSEE_income["ind_r"]
     usrs_with_INSEE_income["density"]=usrs_with_INSEE_income["ind_r"]/(0.04*usrs_with_INSEE_income["nbcar_x"])
-    usrs_with_INSEE_income.drop(["Unnamed: 0","nbcar_x"],axis=1,inplace=True);
+    #usrs_with_INSEE_income.drop(["Unnamed: 0","nbcar_x"],axis=1,inplace=True);
     return usrs_with_INSEE_income
 
 """ Filters out non-reliable users and computes home location"""
