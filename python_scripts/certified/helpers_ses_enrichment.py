@@ -101,8 +101,7 @@ def insee_sjoin(usr_df,country_info,prec=2):
         else:
             all_together.append([None for i in range(nb_vars)])
     #
-    insee_df=pd.DataFrame(all_together)
-    insee_df.columns=country_df.columns
+    insee_df=pd.DataFrame(all_together,columns=country_df.columns)
     usrs_with_INSEE_income=pd.concat([usr_df.reset_index(drop=True),insee_df.reset_index(drop=True)],ignore_index=True,axis=1)
     insee_cols=list(insee_df.columns)
     insee_cols[2]="insee_id"
@@ -115,19 +114,22 @@ def insee_sjoin(usr_df,country_info,prec=2):
     return usrs_with_INSEE_income
 
 """ Filters out non-reliable users and computes home location"""
-def reliable_home_location(usrs_with_SES_info_dic,income_str,max_km_var=10,max_km_per_h=120,nb_mini_locs=5,nb_min_crazy=20,thresh_rate=3):
+def reliable_home_location(usrs_with_SES_info_dic,ses_source,max_km_var=10,max_km_per_h=120,nb_mini_locs=5,nb_min_crazy=20,thresh_rate=3):
+    income_val = "DEC_MED13" if ses_source == 'iris' else "income"
+    income_field = "IRIS" if ses_source == 'iris' else "idINSPIRE"
     dic_locs_reals, _, _, _, _, _, _ = help_loc.fast_get_repr_location(dic_locs=usrs_with_SES_info_dic,max_km_var=max_km_var,
                                                                        max_km_per_h=max_km_per_h,nb_mini_locs=nb_mini_locs,nb_min_crazy=nb_min_crazy)
     new_dic_real, _ = help_loc.remove_hyperactive_usrs(dic_locs_reals,pandas_version=0,thresh_rate=thresh_rate)
     new_dic_real, _ = help_loc.remove_hyper_social_usrs(dic_real=new_dic_real)
     dic_pd = {k:pd.DataFrame(v,columns=["lat","lon","day","hour","minu","sec","year","month","fecha"]) for k,v in tqdm(new_dic_real.items())}
-    home_most_freq_all = help_loc.go_through_home_candidates(new_dic_real,help_loc.take_most_frequent_thresh)
+    #
+    home_most_freq_all = help_loc.go_through_home_candidates(new_dic_real,help_loc.take_most_frequent_thresh,field=income_field)
     dic_all_users_insee={usr:{"profile":(new_dic_real[usr].profile),
                               "locations":new_dic_real[usr][["lat","lon","tweet","day", "hour","minu","sec", "year","month","fecha", "geo_pt","service"]],
                               "inferred_loc":home_most_freq_all[usr][["lat","lon"]],
                               "suppl_info":home_most_freq_all[usr]}
                          for usr in tqdm(home_most_freq_all.keys())}
     #
-    usr2ses=pd.DataFrame([[k,v["suppl_info"][income_str]] for k,v in dic_all_users_insee.items()],
+    usr2ses=pd.DataFrame([[k,v["suppl_info"][income_val]] for k,v in dic_all_users_insee.items()],
                          columns=["usr","insee_iris_inc"]).dropna(how="any")
     return usr2ses

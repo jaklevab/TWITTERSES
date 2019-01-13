@@ -231,8 +231,8 @@ def location_to_weighted_income(dic_usr_locs,dic_dist,dic_soc_info,precision):
     return new_dic_usr_loc
 
 """ Take most frequent location out of visited ones if present more than min_times with a min span of min_days"""
-def take_most_frequent_thresh(geopandas_usr,min_times=5,min_days=1):
-    polys_visited=list(geopandas_usr.IRIS)
+def take_most_frequent_thresh(geopandas_usr,min_times=5,min_days=1,field="IRIS"):
+    polys_visited=list(geopandas_usr[field])
     time_of_visit=[datetime(int(row.year),int(row.month),int(row.fecha),
                             int(row.hour),int(row.minu),int(row.sec))
                    for it,row in geopandas_usr.iterrows()]
@@ -247,8 +247,8 @@ def take_most_frequent_thresh(geopandas_usr,min_times=5,min_days=1):
         return None,None
 
 """ Gets ratio of how much more the first most visited location was observed than the second most visited """
-def get_check_in_rate_margin_most_freq(geopandas_usr):
-    polys_visited=list(geopandas_usr.IRIS)
+def get_check_in_rate_margin_most_freq(geopandas_usr,field="IRIS"):
+    polys_visited=list(geopandas_usr[field])
     inter=Counter(polys_visited).most_common(2)
     if len(inter)<2:
         return None,None,None,None,None
@@ -259,8 +259,8 @@ def get_check_in_rate_margin_most_freq(geopandas_usr):
            ((locat_mode[1]+0.0-sec_locat_mode[1])/(sec_locat_mode[1]+locat_mode[1])))
 
 """ Take most frequent night location out of visited ones"""
-def take_most_frequent_night_thresh(geopandas_usr,start=21,stop=6) :
-    polys_visited=(geopandas_usr.IRIS)
+def take_most_frequent_night_thresh(geopandas_usr,start=21,stop=6,field="IRIS") :
+    polys_visited=(geopandas_usr[field])
     polys_visited_night=polys_visited[(geopandas_usr.hour>=start)|(geopandas_usr.hour<stop)]
     if len(polys_visited_night)==0:
         return None,None

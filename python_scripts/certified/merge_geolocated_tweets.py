@@ -36,15 +36,6 @@ def individual_file_treatment(file_to_treat):
     return (pd.DataFrame(data_to_return,columns=["tweet_id","tweet_date","tweet_text"]))
 
 
-# Checks if path already exists before deleting any previous attempt to produce the output
-if os.path.exists(output_file):
-    entered=input("Previous file of merged tweets will be removed. Do you want to continue?")
-    if entered=="y":
-        pass
-    else:
-        raise ValueError(' Execution stopped to prevent previous merged file removal.')
-
-
 if __name__ == '__main__':
    parser = argparse.ArgumentParser()
    parser.add_argument("-h", "--home_dir")

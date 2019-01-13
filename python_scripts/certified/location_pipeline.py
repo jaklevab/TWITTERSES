@@ -77,8 +77,7 @@ if __name__ == '__main__':
     ## Location Filtering + SES enrichment
     usrs_with_income = gpd.sjoin(data_geo_france, dec_income,op='within') if ses_source == 'iris' else help_ses.insee_sjoin(data_geo_france,dec_income)
     usrs_with_SES_info_dic = factorize_income_data(usrs_with_income)
-    income_str = "DEC_MED13" if ses_source == 'iris' else "income"
-    usr2ses = help_ses.reliable_home_location(usrs_with_SES_info_dic,income_str)
+    usr2ses = help_ses.reliable_home_location(usrs_with_SES_info_dic,ses_source)
     ses_text_insee=pd.merge(df_usr_profile_tweets,usr2ses,left_on="id",right_on="usr")
     ses_text_insee.dropna(subset=["insee_iris_inc"],inplace=True)
     ses_insee_class=np.array(ses_text_insee.insee_iris_inc> np.nanmedian(ses_text_insee.insee_iris_inc)).astype(np.int)# 2 class
