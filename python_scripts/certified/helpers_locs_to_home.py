@@ -288,7 +288,7 @@ def distance_to_home(geopandas_usr,select_home_loc,args):
 def go_through_home_candidates(dic_gpd,select_home_loc,field="IRIS"):
     dic_exam={}
     for usr,gpd in tqdm(dic_gpd.items()):
-        idx,loc=select_home_loc(gpd,field?field)
+        idx,loc=select_home_loc(gpd,field=field)
         if idx is None:
             continue
         dic_exam.setdefault(usr,gpd.iloc[idx])
