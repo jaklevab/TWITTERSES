@@ -58,8 +58,10 @@ if __name__ == '__main__':
     parser.add_argument('-ses', '--ses_data',help = 'Source for SES Map (iris or insee)',
                   default="iris",choices=['insee','iris'])
     parser.add_argument('-o', '--output',help = 'Output filename',default="")
+    parser.add_argument('-njbs', '--njbs',help = 'Number of jobs to parallelize over',default=-1)
     args = parser.parse_args()
     ses_source = args.ses_data
+    n_jobs = args.njbs
     #Data Generation
     #
     ## Location + SES
@@ -86,5 +88,5 @@ if __name__ == '__main__':
     mat_info=np.vstack([np.hstack(sample.as_matrix()).reshape((1,len(ses_text_insee.iloc[0]["fts"])))
                         for it,sample in (ses_text_insee[["fts",]].iterrows())])
     X = StandardScaler().fit_transform(mat_info)
-    dic_res=help_class.test_all_models(X, ses_insee_class)
+    dic_res=help_class.test_all_models(X, ses_insee_class,n_jobs=n_jobs)
     pickle.dump(dic_res, open( "/warehouse/COMPLEXNET/jlevyabi/tmp/test_location_%s.p"%(args.output), "wb" ))

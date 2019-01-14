@@ -77,5 +77,5 @@ def outer_cv_loop(X, y, model_str,n_jobs, nb_rep_test = 2):
     return dic_res
 
 """ Compute performance metrics over all models for chosen data"""
-def test_all_models(X, y,n_jobs):
+def test_all_models(X, y,n_jobs=90):
     return {model_name: outer_cv_loop(X, y, model_name,n_jobs) for model_name in ["rforest","xgb"]}
