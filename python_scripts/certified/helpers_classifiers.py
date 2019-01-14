@@ -11,7 +11,7 @@ from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 import pandas as pd
 
 """ Model Definition for cross_validation"""
-def generate_standard_model(model_str,rd_seed, n_splits = 5, n_repeats = 5, n_iter = 250, n_jobs = 93, verbose = 1):
+def generate_standard_model(model_str,rd_seed, n_jobs, n_splits = 5, n_repeats = 5, n_iter = 250,  verbose = 1):
     cv_classif = RepeatedStratifiedKFold(n_splits=n_splits, n_repeats=n_repeats)
     scorer_classif = make_scorer(roc_auc_score, greater_is_better=True, needs_threshold=True)
     if model_str == "svm":
@@ -50,9 +50,9 @@ def generate_standard_model(model_str,rd_seed, n_splits = 5, n_repeats = 5, n_it
     return model_classif
 
 """ Inner Cross-Validation Loop """
-def cv_classify_data(X, y, rd_seed,model_str,frac_test = .2,):
+def cv_classify_data(X, y, rd_seed,model_str,n_jobs,frac_test = .2,):
     X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=frac_test,random_state=rd_seed)
-    model_classif = generate_standard_model(model_str,rd_seed)
+    model_classif = generate_standard_model(model_str,rd_seed,n_jobs)
     model_classif.fit(X_train, y_train)
     model_best=model_classif.best_estimator_
     model_best.fit(X_train,y_train)
@@ -63,11 +63,11 @@ def cv_classify_data(X, y, rd_seed,model_str,frac_test = .2,):
     return (model_classif.best_params_, model_classif.best_score_, fpr, tpr, threshold, roc_auc)
 
 """ Outer Cross-Validation Loop """
-def outer_cv_loop(X, y, model_str, nb_rep_test = 2):
+def outer_cv_loop(X, y, model_str,n_jobs, nb_rep_test = 2):
     dic_res={"best_params":[],"best_score":[],"auc":[],"fpr":[],"tpr":[],"threshold":[]}
     print("Fitting Model: %s ...."%model_str)
     for i in tqdm(range(1,nb_rep_test+1)):
-        best_params, best_score, fpr, tpr, threshold, roc_auc = cv_classify_data(X, y, i,model_str)
+        best_params, best_score, fpr, tpr, threshold, roc_auc = cv_classify_data(X, y, i,model_str,n_jobs)
         dic_res["best_params"].append(best_params)
         dic_res["best_score"].append(best_score)
         dic_res["fpr"].append(fpr)
@@ -77,5 +77,5 @@ def outer_cv_loop(X, y, model_str, nb_rep_test = 2):
     return dic_res
 
 """ Compute performance metrics over all models for chosen data"""
-def test_all_models(X, y):
-    return {model_name: outer_cv_loop(X, y, model_name) for model_name in ["rforest","xgb"]}
+def test_all_models(X, y,n_jobs):
+    return {model_name: outer_cv_loop(X, y, model_name,n_jobs) for model_name in ["rforest","xgb"]}

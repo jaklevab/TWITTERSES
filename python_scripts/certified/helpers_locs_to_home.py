@@ -187,8 +187,6 @@ def remove_hyper_social_usrs(dic_real,friend_foll_thresh=5000):
     suspected_automated_usrs=[]
     with pd.option_context('display.max_rows', None, 'display.max_columns', 30):#with con:
         for usr in (dic_real.keys()):
-            #cur = con.cursor()
-            #cur.execute("SELECT friends FROM users WHERE id = '%s'" %usr )
             s_friends=[]#json.loads(cur.fetchone()[0])
             if (len(s_friends)>=friend_foll_thresh):
                 suspected_automated_usrs.append(usr)
@@ -267,6 +265,22 @@ def take_most_frequent_night_thresh(geopandas_usr,start=21,stop=6,field="IRIS") 
     locat_mode=Counter(polys_visited_night).most_common(1)[0][0]
     idx_mode=list(polys_visited).index(locat_mode)
     return idx_mode,geopandas_usr.iloc[idx_mode][["lat","lon"]]
+
+""" Take most frequent location out of visited and dbscan clustered ones if present more than min_times with a min span of min_days"""
+def take_most_frequent_thresh_dbscan(geopandas_usr,min_times=5,min_days=1,field="IRIS",max_dist=300):
+    polys_visited=list(geopandas_usr[field])
+    time_of_visit=[datetime(int(row.year),int(row.month),int(row.fecha),int(row.hour),int(row.minu),int(row.sec)) for it,row in geopandas_usr.iterrows()]
+    geo_locs_wgs = np.array(geopandas_usr[["lat","lon"]]).astype(float)
+    geo_locs_cartes=proj_arr(geo_locs_wgs,uk)
+    clustering_locs = DBSCAN(eps=max_dist, min_samples=1).fit(geo_locs_cartes)
+    clust_labels_cnt = Counter(clustering_locs.labels_)
+    locs_most_freq,cnt_most_freq = Counter(labels).most_common(1)[0]
+    inter_idx=np.where(clustering_locs.labels_==locs_most_freq)[0].tolist()
+    time_diff=[time_of_visit[i] for i in inter_idx]
+    if cnt_most_freq>=min_times and (max(time_diff)-min(time_diff)).days>=min_days:
+        return inter_idx[0],geopandas_usr.iloc[inter_idx[0]][["lat","lon"]]
+    else:
+        return None,None
 
 """ Efficient computation of distance matrix between all visited locations (mts)"""
 def get_distance_matrix(geopandas_usr):
