@@ -61,7 +61,7 @@ if __name__ == '__main__':
     parser.add_argument('-njbs', '--njbs',help = 'Number of jobs to parallelize over',default=-1)
     args = parser.parse_args()
     ses_source = args.ses_data
-    n_jobs = args.njbs
+    n_jobs = int(args.njbs)
     #Data Generation
     #
     ## Location + SES
