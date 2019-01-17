@@ -1,3 +1,0 @@
-# Obtaining Census Data 
-
-
