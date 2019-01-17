@@ -18,6 +18,8 @@ if __name__ == '__main__':
     print("Parsing Arguments...")
     parser = argparse.ArgumentParser()
     parser.add_argument('-o', '--output',help = 'Output filename',default="")
+    parser.add_argument('-njbs', '--njbs',help = 'Number of jobs to parallelize over',default=-1)
+    n_jobs = int(args.njbs)
     args = parser.parse_args()
     #Data Generation
     #
@@ -40,5 +42,5 @@ if __name__ == '__main__':
     mat_info = np.vstack([np.hstack(sample.as_matrix()).reshape((1,len(ses_text_insee.iloc[0]["fts"])))
                         for it,sample in (ses_text_insee[["fts",]].iterrows())])
     X = StandardScaler().fit_transform(mat_info)
-    dic_res=help_class.test_all_models(X, ses_insee_class)
+    dic_res=help_class.test_all_models(X, ses_insee_class,n_jobs=n_jobs)
     pickle.dump(dic_res, open( "/warehouse/COMPLEXNET/jlevyabi/tmp/test_occupation_%s.p"%(args.output), "wb" ))

@@ -19,11 +19,12 @@ import os
 import warnings
 warnings.filterwarnings("ignore")
 
+# Projection from mercator to cartesian coordinates
 uk = '+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 \
 +x_0=400000 +y_0=-100000 +ellps=airy \
 +towgs84=446.448,-125.157,542.06,0.15,0.247,0.842,-20.489 +units=m +no_defs'
 
-"""Take string of data returns arrays for day, ..., year"""
+"""Take date string returns time parsed information for day, ..., year"""
 def time_2_date(time_array):
     fechas=[];days=[];hours=[];minutes=[];seconds=[];years=[];months=[]
     for times in tqdm(time_array):
@@ -56,7 +57,7 @@ def proj_arr(points,proj_to):
 def conv_to_hours(time_delt):
     return abs(time_delt.days)*24.0+time_delt.seconds/3600
 
-""" Returns category of user (real, to fast, ...) """
+""" Returns category of user (real users, user moving too fast, ...) """
 def is_real(visit_df,max_km_var,max_km_per_h,nb_mini_locs):
     dists=[];N=visit_df.shape[0]
     if(N<=nb_mini_locs):
@@ -78,7 +79,7 @@ def is_real(visit_df,max_km_var,max_km_per_h,nb_mini_locs):
         return False,1,med,speed
     return True,"",rel_dist,speed
 
-""" Signals too fast/variable accounts  """
+""" Signals too fast/variable users  """
 def filter_crazy_users(dic,max_km_var,max_km_per_h,nb_mini_locs,nb_min_crazy):
     dic_too_fast={}
     dic_too_var={}
