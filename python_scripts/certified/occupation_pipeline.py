@@ -43,11 +43,11 @@ if __name__ == '__main__':
     usr2ses = pd.read_csv(base_dir + "icdm18/issues/linkedin_salaries.csv")
     ses_text_occ = pd.merge(df_usr_profile_tweets,usr2ses,left_on="id",right_on="user_id")
     ses_text_occ.dropna(subset=["estimated_sal"],inplace=True)
-    ses_insee_class = np.array(ses_text_insee.estimated_sal> np.nanmedian(ses_text_insee.estimated_sal)).astype(np.int)# 2 class
+    ses_occ_class = np.array(ses_text_occ.estimated_sal> np.nanmedian(ses_text_occ.estimated_sal)).astype(np.int)# 2 class
     #
     # Model Fitting
-    mat_info = np.vstack([np.hstack(sample.as_matrix()).reshape((1,len(ses_text_insee.iloc[0]["fts"])))
-                        for it,sample in (ses_text_insee[["fts",]].iterrows())])
+    mat_info = np.vstack([np.hstack(sample.as_matrix()).reshape((1,len(ses_text_occ.iloc[0]["fts"])))
+                        for it,sample in (ses_text_occ[["fts",]].iterrows())])
     X = StandardScaler().fit_transform(mat_info)
-    dic_res=help_class.test_all_models(X, ses_insee_class,n_jobs=n_jobs)
+    dic_res=help_class.test_all_models(X, ses_occ_class,n_jobs=n_jobs)
     pickle.dump(dic_res, open( "/warehouse/COMPLEXNET/jlevyabi/tmp/test_occupation_%s.p"%(args.output), "wb" ))
