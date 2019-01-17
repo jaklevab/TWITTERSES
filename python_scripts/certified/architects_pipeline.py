@@ -39,7 +39,7 @@ if __name__ == '__main__':
     df_usr_profile_tweets = help_txt.generate_full_features(df_usr_profile_tweets,min_tweets=50)
     #
     ## SES enrichment
-    usr2ses = pd.read_csv(base_dir + ""data_files/UKSOC_rep/archi_ses_data.csv")
+    usr2ses = pd.read_csv(base_dir + "data_files/UKSOC_rep/archi_ses_data.csv")
     ses_text_archi = pd.merge(df_usr_profile_tweets,usr2ses,left_on="id",right_on="user_id")
     ses_text_archi.dropna(subset=["bianswer"],inplace=True)
     ses_archi_class = np.array(ses_text_archi.bianswer).astype(np.int)# 2 class
