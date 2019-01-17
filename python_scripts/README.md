@@ -24,4 +24,4 @@ Additional steps must be taken to obtain the data needed for this pipeline. Firs
 
 Non-Residential locations must then be filtered out. To do so, we train a ResNet50 on the UCMerced Dataset (download [here](http://weegee.vision.ucmerced.edu/datasets/landuse.html)) to filter out satellite tiles recognized as something different to a residential location. Training of the model can be achieved with the [UCMERCED_train.py](../python_scripts/data_coll_process/UCMERCED_train.py) script. Filtering and generation of the annotation-ready dataset is then performed in this [notebook](../ipynb_notebooks/Recognize_Residential_Areas.ipynb)
 
-Final plots are then done here.
+Final plots are then done [here](../ipynb_notebooks/Paper_Figures.ipynb).
