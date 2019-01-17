@@ -50,4 +50,4 @@ if __name__ == '__main__':
                         for it,sample in (ses_text_occ[["fts",]].iterrows())])
     X = StandardScaler().fit_transform(mat_info)
     dic_res=help_class.test_all_models(X, ses_occ_class,n_jobs=n_jobs)
-    pickle.dump(dic_res, open( "/warehouse/COMPLEXNET/jlevyabi/tmp/test_occupation_%s.p"%(args.output), "wb" ))
+        pickle.dump(dic_res, open( "/warehouse/COMPLEXNET/jlevyabi/tmp/test_occupation_%s.p"%(args.output), "wb" ))
