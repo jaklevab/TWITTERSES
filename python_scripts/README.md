@@ -5,7 +5,7 @@ This step requires having an available word2vec model trained on a twitter sampl
 
 ## Census Data
 
-Before running the location pipeline, the census data needs to be stored locally. Depending on the resolution of the data wanted for the later training, you may use the ``IRIS`` or ``insee`` flag. The __IRIS__ dataset is already provided in the [INSEE IRIS](../data_files/INSEE_IRIS) while the __INSEE\_200m__ needs to be downloaded following the link in the README file. Similarly,  annotation of linkedin users for professional occupation was done using the census data provided in the [INSEE_SOC](../data_files/INSEE SOC) folder.
+Before running the location pipeline, the census data needs to be stored locally. Depending on the resolution of the data wanted for the later training, you may use the ``IRIS`` or ``insee`` flag. The __IRIS__ dataset is already provided in the [INSEE IRIS](../data_files/INSEE_IRIS) while the[INSEE 200m](../data_files/INSEE_200m)needs to be downloaded following the link in the README file. Similarly,  annotation of linkedin users for professional occupation was done using the census data provided in the [INSEE_SOC](../data_files/INSEE SOC) folder.
 
 ## Location/Occupation Pipeline
 
