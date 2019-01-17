@@ -292,7 +292,7 @@ def get_distance_matrix(geopandas_usr):
     return z
 
 """ Computes distance between most visited location and all others (mts)"""
-def distance_to_home(geopandas_usr,select_home_loc,args):
+def 1(geopandas_usr,select_home_loc,args):
     idx,loc=select_home_loc(geopandas_usr,*args)
     if idx is None:
         return None,None,None

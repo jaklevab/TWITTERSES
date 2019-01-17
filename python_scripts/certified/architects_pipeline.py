@@ -27,6 +27,7 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--output',help = 'Output filename',default="")
     parser.add_argument('-njbs', '--njbs',help = 'Number of jobs to parallelize over',default=-1)
     args = parser.parse_args()
+    n_jobs = int(args.njbs)
     #Data Generation
     #
     base_dir = "/warehouse/COMPLEXNET/jlevyabi/TWITTERSES/ml_soc_econ/"
@@ -48,5 +49,5 @@ if __name__ == '__main__':
     mat_info = np.vstack([np.hstack(sample.as_matrix()).reshape((1,len(ses_text_archi.iloc[0]["fts"])))
                         for it,sample in (ses_text_archi[["fts",]].iterrows())])
     X = StandardScaler().fit_transform(mat_info)
-    dic_res=help_class.test_all_models(X, ses_archi_class)
+    dic_res=help_class.test_all_models(X, ses_archi_class,n_jobs=n_jobs)
     pickle.dump(dic_res, open( "/warehouse/COMPLEXNET/jlevyabi/tmp/test_archi_%s.p"%(args.output), "wb" ))
