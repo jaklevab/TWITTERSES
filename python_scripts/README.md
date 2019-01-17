@@ -5,7 +5,7 @@ This step requires having an available word2vec model trained on a twitter sampl
 
 ## Census Data
 
-Before running the location pipeline, the census data needs to be stored locally. Depending on the resolution of the data wanted for the later training, you may use the ``IRIS`` or ``insee`` flag. The __IRIS__ dataset is already provided in the [INSEE IRIS](../data_files/INSEE_IRIS) while the[INSEE 200m](../data_files/INSEE_200m)needs to be downloaded following the link in the README file. Similarly,  annotation of linkedin users for professional occupation was done using the census data provided in the [INSEE_SOC](../data_files/INSEE SOC) folder.
+Before running the location pipeline, the census data needs to be stored locally. Depending on the resolution of the data wanted for the later training, you may use the ``IRIS`` or ``insee`` flag. The __IRIS__ dataset is already provided in the [INSEE IRIS](../data_files/INSEE_IRIS) while the [INSEE 200m](../data_files/INSEE_200m) needs to be downloaded following the link in the README file. Similarly,  annotation of linkedin users for professional occupation was done using the census data provided in the [INSEE_SOC](../data_files/INSEE SOC) folder.
 
 ## Location/Occupation Pipeline
 
@@ -18,7 +18,7 @@ An identical procedure must be followed for the occupation pipeline with the add
 
 ## Remote-Sensing Pipeline
 
-Additional steps must be taken to obtain the data needed for this pipeline. First, coordinates for the set of locations for which the GSV Satellite and Street View must be stored. In order to be able to collect this a Google Maps Static API key must be obtained and introduced in the [get\_gsv\_images.py](../python_scripts/data_coll_process/get_gsv_images.py). The collection must then be run as follows:
+Additional steps must be taken to obtain the data needed for this pipeline. First, coordinates for the set of locations for which the GSV Satellite and Street View must be stored. In order to be able to collect this a Google Maps Static [API key](https://developers.google.com/maps/documentation/javascript/get-api-key) must be obtained and introduced in the [get\_gsv\_images.py](../python_scripts/data_coll_process/get_gsv_images.py). The collection must then be run as follows:
 
 ``python get_gsv_images.py -input_file -of output_file  -gsv_met metadata_file -log log_file``
 
