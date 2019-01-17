@@ -26,8 +26,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-o', '--output',help = 'Output filename',default="")
     parser.add_argument('-njbs', '--njbs',help = 'Number of jobs to parallelize over',default=-1)
-    n_jobs = int(args.njbs)
     args = parser.parse_args()
+    n_jobs = int(args.njbs)
     #Data Generation
     #
     base_dir = "/warehouse/COMPLEXNET/jlevyabi/TWITTERSES/ml_soc_econ/"
